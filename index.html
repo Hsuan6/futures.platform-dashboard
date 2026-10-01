@@ -357,22 +357,6 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       <div class="tblwrap"><table id="growthTable"><thead></thead><tbody></tbody></table></div>
     </section>
 
-    <section class="card">
-      <h2>季節性與異常偵測</h2>
-      <p class="desc">依業績（總業績口數，含非電子通路）分析；下方為年×月熱力圖（同一年內顏色越深代表該月業績相對較高），及兩種互補的異常偵測：「絕對水位異常」抓單月業績相對過去12個月是否明顯偏高／偏低；「月增減率異常」抓單月漲跌幅度是否急遽轉折（即使水位仍落在過去區間內，也可能被抓到，適合捕捉如政策衝擊等短期急遽變化）</p>
-      <div class="note-card" style="margin-bottom:16px;">
-        兩種異常偵測抓到的月份不會完全一樣，適合的情境也不同：<br><br>
-        <b>絕對水位異常</b>：看「這個月量體本身，相對近期正常範圍算不算異常大／小」，適合用來判斷業績是否已經站上或跌破新常態，常用在資源調度、備援人力評估、營運規模檢視等場合。缺點是如果業績為緩步墊高、或已連續好幾個月維持高檔，近12個月均值也會跟著墊高，反而不容易被抓到——所以連續數月的「結構性成長」通常只有起漲的那一兩個月會被標記。<br><br>
-        <b>月增減率異常</b>：看「這個月相對上個月，變化幅度算不算異常劇烈」，適合抓政策衝擊、系統異動、行銷活動等造成的單月急遽轉折，即使當月水位仍落在過去正常區間內也會被抓到。缺點是一旦新的高（或低）水位穩定維持，月增減率會回到正常範圍，不會持續被列入清單——所以它抓到的是「轉折的那一刻」，不是「持續偏高／偏低的狀態」。<br><br>
-        實務上建議兩張表一起看：只出現在「絕對水位異常」的月份，代表量體明顯偏離常態但變化較平緩；只出現在「月增減率異常」的月份，代表當月出現急遽轉折但水位還沒真的偏離歷史區間；兩張表都出現的月份，通常就是最值得留意的單月劇變。
-      </div>
-      <div class="tblwrap" id="seasonalHeatmap"></div>
-      <p class="desc" id="anomalyDesc" style="margin-top:18px;">絕對水位異常清單</p>
-      <div class="tblwrap"><table id="anomalyTable"><thead></thead><tbody></tbody></table></div>
-      <p class="desc" id="returnAnomalyDesc" style="margin-top:18px;">月增減率異常清單</p>
-      <div class="tblwrap"><table id="returnAnomalyTable"><thead></thead><tbody></tbody></table></div>
-    </section>
-
     <section class="card" id="sec1-channel-structure">
       <h2>通路結構與戶數／業績關係</h2>
       <p class="desc" id="channelBarDesc">上：各通路（AP／APP／網站）成交口數堆疊柱狀圖；下：實動戶數與成交口數雙軸對照，觀察戶數與交易量是否同步成長</p>
@@ -384,7 +368,9 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       <span>交易通路與平台貢獻</span>
       <span class="section-divider-sub">以下為各平台／APP／通路的細部歸因，數字與上方總覽同源</span>
     </div>
+    <p class="desc" id="platformEntityMismatchNote" style="display:none;margin-top:-8px;">⚠️ 以下各平台別數據（平台排名、平台別明細表、圓餅圖、APP／AP 明細分析、月度趨勢等）均來自「AP電子業績」／「APP電子業績」分頁，這兩個分頁只有「元大期貨含IB」單一公司別的資料，不適用於目前選取的公司別，故暫時隱藏，避免誤把元大期貨含IB的數字當成目前公司別的數字；如需查看請將上方公司別切換回「元大期貨含IB」。</p>
 
+    <div id="platformEntitySections">
     <section class="card">
       <h2>平台排名與結構變化</h2>
       <p class="desc" id="platformRankDesc">依業績（成交口數）排序；下方為 API／DMA 成交口數趨勢，及前 5 大平台＋其他之占比堆疊趨勢</p>
@@ -470,6 +456,23 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       <div class="chart-wrap tall" style="margin-bottom:20px;"><canvas id="chartTrendOrders"></canvas></div>
       <div class="chart-wrap tall"><canvas id="chartTrendVol"></canvas></div>
     </section>
+    </div>
+
+    <section class="card">
+      <h2>季節性與異常偵測</h2>
+      <p class="desc">依業績（總業績口數，含非電子通路）分析；下方為年×月熱力圖（同一年內顏色越深代表該月業績相對較高），及兩種互補的異常偵測：「絕對水位異常」抓單月業績相對過去12個月是否明顯偏高／偏低；「月增減率異常」抓單月漲跌幅度是否急遽轉折（即使水位仍落在過去區間內，也可能被抓到，適合捕捉如政策衝擊等短期急遽變化）</p>
+      <div class="note-card" style="margin-bottom:16px;">
+        兩種異常偵測抓到的月份不會完全一樣，適合的情境也不同：<br><br>
+        <b>絕對水位異常</b>：看「這個月量體本身，相對近期正常範圍算不算異常大／小」，適合用來判斷業績是否已經站上或跌破新常態，常用在資源調度、備援人力評估、營運規模檢視等場合。缺點是如果業績為緩步墊高、或已連續好幾個月維持高檔，近12個月均值也會跟著墊高，反而不容易被抓到——所以連續數月的「結構性成長」通常只有起漲的那一兩個月會被標記。<br><br>
+        <b>月增減率異常</b>：看「這個月相對上個月，變化幅度算不算異常劇烈」，適合抓政策衝擊、系統異動、行銷活動等造成的單月急遽轉折，即使當月水位仍落在過去正常區間內也會被抓到。缺點是一旦新的高（或低）水位穩定維持，月增減率會回到正常範圍，不會持續被列入清單——所以它抓到的是「轉折的那一刻」，不是「持續偏高／偏低的狀態」。<br><br>
+        實務上建議兩張表一起看：只出現在「絕對水位異常」的月份，代表量體明顯偏離常態但變化較平緩；只出現在「月增減率異常」的月份，代表當月出現急遽轉折但水位還沒真的偏離歷史區間；兩張表都出現的月份，通常就是最值得留意的單月劇變。
+      </div>
+      <div class="tblwrap" id="seasonalHeatmap"></div>
+      <p class="desc" id="anomalyDesc" style="margin-top:18px;">絕對水位異常清單</p>
+      <div class="tblwrap"><table id="anomalyTable"><thead></thead><tbody></tbody></table></div>
+      <p class="desc" id="returnAnomalyDesc" style="margin-top:18px;">月增減率異常清單</p>
+      <div class="tblwrap"><table id="returnAnomalyTable"><thead></thead><tbody></tbody></table></div>
+    </section>
   </div>
 
   <!-- ============ ② 數位服務與客戶數位化 ============ -->
@@ -517,8 +520,6 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       <div class="chart-wrap"><canvas id="chartIBChannelSplit"></canvas></div>
       <p class="desc" style="margin-top:18px;">外IB／元證 開戶完成數對照（逐月；2023/04 起始有分公司別拆分）</p>
       <div class="chart-wrap"><canvas id="chartIBEntitySplit"></canvas></div>
-      <p class="desc" style="margin-top:18px;">線上占比趨勢（近 24 個月）</p>
-      <div class="chart-wrap"><canvas id="chartIBOnlineRatio"></canvas></div>
     </section>
 
     <section class="card" id="sec4-triple">
@@ -1174,6 +1175,17 @@ function withApBreakdown(elec, entityLabel){
 }
 
 // 依目前選擇的公司別，重新渲染電子業績佔比／通路堆疊圖與新增的三張通路趨勢圖，並同步更新 KPI
+// 「AP電子業績」「APP電子業績」兩個分頁只有「元大期貨含IB」單一公司別的資料（不像「電子業績」分頁依公司別
+// 拆成多個區塊），凡是用到這兩個分頁資料的整個區塊（平台排名、平台別明細表、圓餅圖、APP／AP 明細分析、
+// 月度趨勢等，見 HTML 中 #platformEntitySections 包住的範圍）在公司別切到非「元大期貨含IB」時都要整組隱藏，
+// 避免把元大期貨含IB的數字誤當成目前選取公司別（例如元証IB分公司）的數字呈現。
+function updatePlatformEntityVisibility(){
+  const matches = !lastApPlatEntity || !currentElecEntity || normEntityName(currentElecEntity)===normEntityName(lastApPlatEntity);
+  const wrap = document.getElementById('platformEntitySections');
+  const note = document.getElementById('platformEntityMismatchNote');
+  if(wrap) wrap.style.display = matches ? '' : 'none';
+  if(note) note.style.display = matches ? 'none' : '';
+}
 function renderElecSection(){
   const rawElec = (currentElecEntity && lastElecAll[currentElecEntity]) || [];
   const elec = withApBreakdown(rawElec, currentElecEntity);
@@ -1182,6 +1194,7 @@ function renderElecSection(){
     ? `資料涵蓋 ${dateLabel(elec[0].date)} － ${dateLabel(latestElec.date)}（最新月：${dateLabel(latestElec.date)}・公司別：${currentElecEntity}）`
     : '未偵測到電子業績資料';
 
+  updatePlatformEntityVisibility();
   renderKPIs(Object.assign({elec, latestElec}, lastNonElecData));
   renderElecChannelTrendCharts(elec);
   renderChannelBarAndDualAxis(elec);
@@ -2420,7 +2433,7 @@ function renderAccountOpeningSection(website, ibFutures){
 
 /* ===================== Tab④ 新增：IB 加開期貨戶 ===================== */
 function renderIBFuturesSection(ibFutures){
-  ['ib','ibApplyGap','ibChannelSplit','ibEntitySplit','ibRatio'].forEach(k=>{ if(charts[k]) charts[k].destroy(); });
+  ['ib','ibApplyGap','ibChannelSplit','ibEntitySplit'].forEach(k=>{ if(charts[k]) charts[k].destroy(); });
   const descEl = document.getElementById('ibDesc');
   if(!ibFutures || !ibFutures.length){
     if(descEl) descEl.textContent = '依「IB 加開期貨戶」分頁「臨櫃＋線上」合計欄位計算（目前無資料，請確認是否有「IB 加開期貨戶」分頁）';
@@ -2478,15 +2491,6 @@ function renderIBFuturesSection(ibFutures){
       scales:{x:{...commonScales().x, stacked:true}, y:{stacked:true, beginAtZero:true, grid:{color:'#f0f1f3'}, title:{display:true,text:'開戶完成數',font:{size:10}}}}}
   });
 
-  const ratioSeries = lastN(ibFutures,24);
-  charts.ibRatio = new Chart(document.getElementById('chartIBOnlineRatio'), {
-    type:'line',
-    data:{labels:ratioSeries.map(w=>dateLabel(w.date)), datasets:[
-      {label:'線上占比', data:ratioSeries.map(w=>w.onlineRatio==null?null:w.onlineRatio*100), borderColor:CHART_COLORS.teal, backgroundColor:CHART_COLORS.tealSoft, tension:.25, pointRadius:2, borderWidth:2, fill:true, spanGaps:true}
-    ]},
-    options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>'線上占比：'+(c.parsed.y==null?'—':c.parsed.y.toFixed(1)+'%')}}},
-      scales:{x:commonScales().x, y:{min:0, max:100, grid:{color:'#f0f1f3'}, ticks:{callback:v=>v+'%'}}}}
-  });
 }
 
 /* ===================== Tab④ 新增：一戶三開＋期貨線上開戶 ===================== */
