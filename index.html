@@ -88,6 +88,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 
   #missingSheets{background:var(--orange-light);color:#92400e;border-radius:10px;padding:10px 14px;font-size:13px;margin-bottom:16px;display:none;}
 
+  /* KPI 卡片：統一維持原本多欄排列（含②頁「卡片群組＋連結對應下方圖表」.kpi-group 內的卡片） */
   .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px;}
   @media(max-width:1000px){.kpi-grid{grid-template-columns:repeat(2,1fr);}}
   @media(max-width:520px){.kpi-grid{grid-template-columns:1fr;}}
@@ -109,9 +110,12 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   .kpi-group-head .kpi-group-title{font-size:13.5px;font-weight:800;color:var(--gray-700);}
   .kpi-group-head .kpi-group-link{font-size:11.5px;color:var(--blue);text-decoration:none;white-space:nowrap;margin-left:10px;}
   .kpi-group-head .kpi-group-link:hover{text-decoration:underline;}
-  .kpi-group .kpi-grid{margin-bottom:0;}
   section.card h2{font-size:15.5px;margin:0 0 2px;}
   section.card .desc{font-size:12px;color:var(--gray-500);margin:0 0 14px;}
+  /* 頁籤合併後，用來區隔「總覽」與「通路貢獻明細」兩段內容的視覺分隔線 */
+  .section-divider{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:28px 0 16px;padding-top:22px;border-top:2px solid var(--gray-100);}
+  .section-divider span{font-size:16px;font-weight:800;color:var(--gray-700);}
+  .section-divider .section-divider-sub{font-size:12px;font-weight:400;color:var(--gray-500);}
   .row2{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
   @media(max-width:900px){.row2{grid-template-columns:1fr;}}
   .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;}
@@ -167,6 +171,11 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   table{width:100%;border-collapse:collapse;font-size:13px;}
   th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--gray-100);white-space:nowrap;}
   thead th{background:var(--gray-100);color:var(--gray-700);font-weight:700;font-size:12px;border-bottom:2px solid var(--gray-300);}
+  thead th.sortable-th{cursor:pointer;user-select:none;}
+  thead th.sortable-th:hover{color:var(--blue-dark);}
+  thead th .sort-arrow{display:inline-block;margin-left:5px;font-size:10px;color:var(--gray-500);}
+  thead th.sort-active{color:var(--blue-dark);}
+  thead th.sort-active .sort-arrow{color:var(--blue);}
   tbody tr:hover{background:var(--gray-100);}
   .badge{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11.5px;font-weight:600;}
   .badge.expired{background:var(--red-light);color:var(--red);}
@@ -238,16 +247,17 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   #kpiModal tbody td.delta.neg{color:var(--red);}
 
   /* ---------- 期貨市場／證券市場開戶數 統計面板 ---------- */
-  .acct-panels{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;}
-  @media(max-width:900px){.acct-panels{grid-template-columns:1fr;}}
+  .acct-panels{display:grid;grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));gap:20px;margin-bottom:20px;}
   .acct-panel{background:var(--gray-100);border-radius:12px;padding:16px 18px 14px;}
   .acct-panel h3{margin:0 0 10px;font-size:14.5px;font-weight:800;display:inline-block;border-bottom:2px solid currentColor;padding-bottom:3px;}
   .acct-panel.securities h3{color:var(--green);}
   .acct-panel.futures h3{color:var(--blue-dark);}
+  .acct-panel.yuanta h3{color:#f97316;}
   .acct-panel .stat-row{font-size:12.5px;color:var(--gray-700);line-height:1.95;}
   .acct-panel .stat-row b{font-weight:800;}
   .acct-panel.securities .stat-row b{color:var(--green);}
   .acct-panel.futures .stat-row b{color:var(--blue-dark);}
+  .acct-panel.yuanta .stat-row b{color:#f97316;}
   .acct-panel .stat-row b.pos{color:var(--green);}
   .acct-panel .stat-row b.neg{color:var(--red);}
   .acct-panel .stat-empty{font-size:12.5px;color:var(--gray-500);}
@@ -256,6 +266,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   .acct-panel .stat-row.clickable:hover::after{content:'查看明細 ›';position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:10.5px;color:var(--gray-500);}
   .acct-panel.securities .stat-row.clickable:hover::after{color:var(--green);}
   .acct-panel.futures .stat-row.clickable:hover::after{color:var(--blue-dark);}
+  .acct-panel.yuanta .stat-row.clickable:hover::after{color:#f97316;}
 </style>
 </head>
 <body>
@@ -295,11 +306,10 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   <div class="dashboard-layout">
     <nav class="tabnav" id="tabNav">
       <div class="tabnav-label">儀表板選單</div>
-      <button class="tabbtn active" data-tab="1">① 期貨數位營運總覽</button>
-      <button class="tabbtn" data-tab="2">② 交易通路與平台貢獻</button>
-      <button class="tabbtn" data-tab="4">③ 數位服務與客戶數位化</button>
-      <button class="tabbtn" data-tab="5">④ 數位行銷與社群經營</button>
-      <button class="tabbtn" data-tab="6">⑤ 網域與獎項</button>
+      <button class="tabbtn active" data-tab="1">① 期貨數位營運與通路貢獻</button>
+      <button class="tabbtn" data-tab="4">② 數位服務與客戶數位化</button>
+      <button class="tabbtn" data-tab="5">③ 數位行銷與社群經營</button>
+      <button class="tabbtn" data-tab="6">④ 網域與獎項</button>
     </nav>
 
     <div class="main-content">
@@ -309,23 +319,36 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       <div style="font-size:12px;color:var(--gray-500);margin-bottom:6px;">公司別（以下所有數字與圖表皆依此切換）</div>
       <div class="segbtns" id="elecEntityBtns"></div>
     </div>
-    <div class="kpi-grid" id="kpiGrid"></div>
+    <div class="kpi-groups" id="kpiGroups1">
+      <div class="kpi-group">
+        <div class="kpi-group-head"><span class="kpi-group-title">整體總覽</span><a href="#sec1-elec-trend" class="kpi-group-link">查看圖表 ↓</a></div>
+        <div class="kpi-grid" id="kpiGridOverview"></div>
+      </div>
+      <div class="kpi-group">
+        <div class="kpi-group-head"><span class="kpi-group-title">成交口數（依平台）</span><a href="#sec1-channel-structure" class="kpi-group-link">查看圖表 ↓</a></div>
+        <div class="kpi-grid" id="kpiGridChannel"></div>
+      </div>
+      <div class="kpi-group">
+        <div class="kpi-group-head"><span class="kpi-group-title">實動戶與委託</span><a href="#sec1-monthly-trend" class="kpi-group-link">查看圖表 ↓</a></div>
+        <div class="kpi-grid" id="kpiGridAccount"></div>
+      </div>
+      <div class="kpi-group">
+        <div class="kpi-group-head"><span class="kpi-group-title">平均效能指標</span><a href="#sec1-accvoldual" class="kpi-group-link">查看圖表 ↓</a></div>
+        <div class="kpi-grid" id="kpiGridAvg"></div>
+      </div>
+    </div>
 
-    <section class="card">
+    <section class="card" id="sec1-elec-trend">
       <h2>電子業績趨勢</h2>
-      <p class="desc">各通路（AP／APP／網站）實動戶數、委託筆數、業績口數趨勢</p>
+      <p class="desc" id="elecTrendDesc">各通路（AP／APP／網站）實動戶數、委託筆數、業績口數趨勢</p>
+      <div class="segbtns" id="elecTrendPeriodBtns">
+        <button data-period="12">近12個月</button>
+        <button data-period="24">近24個月</button>
+        <button data-period="all" class="active">全部</button>
+      </div>
       <div class="chart-wrap tall" style="margin-bottom:20px;"><canvas id="chartElecAcc"></canvas></div>
       <div class="chart-wrap tall" style="margin-bottom:20px;"><canvas id="chartElecOrders"></canvas></div>
       <div class="chart-wrap tall"><canvas id="chartElecVol"></canvas></div>
-    </section>
-
-    <section class="card">
-      <h2>通路結構與戶數／業績關係</h2>
-      <p class="desc" id="channelBarDesc">左：各通路（AP／APP／網站）成交口數堆疊柱狀圖；右：實動戶數與成交口數雙軸對照，觀察戶數與交易量是否同步成長</p>
-      <div class="row2">
-        <div class="chart-wrap"><canvas id="chartChannelBar"></canvas></div>
-        <div class="chart-wrap"><canvas id="chartAccVolDual"></canvas></div>
-      </div>
     </section>
 
     <section class="card">
@@ -349,11 +372,18 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       <p class="desc" id="returnAnomalyDesc" style="margin-top:18px;">月增減率異常清單</p>
       <div class="tblwrap"><table id="returnAnomalyTable"><thead></thead><tbody></tbody></table></div>
     </section>
-  </div>
 
-  <!-- ============ ② 交易通路與平台貢獻 ============ -->
-  <div class="tabpanel" data-tabpanel="2" style="display:none;">
-    <div class="kpi-grid" id="kpiGrid2"></div>
+    <section class="card" id="sec1-channel-structure">
+      <h2>通路結構與戶數／業績關係</h2>
+      <p class="desc" id="channelBarDesc">上：各通路（AP／APP／網站）成交口數堆疊柱狀圖；下：實動戶數與成交口數雙軸對照，觀察戶數與交易量是否同步成長</p>
+      <div class="chart-wrap tall" style="margin-bottom:20px;"><canvas id="chartChannelBar"></canvas></div>
+      <div class="chart-wrap tall" id="sec1-accvoldual"><canvas id="chartAccVolDual"></canvas></div>
+    </section>
+
+    <div class="section-divider">
+      <span>交易通路與平台貢獻</span>
+      <span class="section-divider-sub">以下為各平台／APP／通路的細部歸因，數字與上方總覽同源</span>
+    </div>
 
     <section class="card">
       <h2>平台排名與結構變化</h2>
@@ -366,10 +396,14 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         <button data-filter="DMA">DMA</button>
       </div>
       <div class="chart-wrap tall"><canvas id="chartPlatformRank"></canvas></div>
-      <div class="row2" style="margin-top:18px;">
-        <div class="chart-wrap"><canvas id="chartApiDma"></canvas></div>
-        <div class="chart-wrap"><canvas id="chartShareTrend"></canvas></div>
+      <p class="desc" id="platformRankPeriodDesc" style="margin-top:18px;">下方兩張趨勢圖區間：全部區間</p>
+      <div class="segbtns" id="platformRankPeriodBtns">
+        <button data-period="12">近12個月</button>
+        <button data-period="24">近24個月</button>
+        <button data-period="all" class="active">全部</button>
       </div>
+      <div class="chart-wrap tall" style="margin-bottom:20px;"><canvas id="chartApiDma"></canvas></div>
+      <div class="chart-wrap tall"><canvas id="chartShareTrend"></canvas></div>
     </section>
 
     <section class="card">
@@ -387,6 +421,37 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     </section>
 
     <section class="card">
+      <h2>當月業績與戶數佔比（全平台圓餅圖）</h2>
+      <p class="desc" id="pieDesc">依最新月資料，AP／APP 所有平台合併統計</p>
+      <div class="chart-wrap" style="height:440px;margin-bottom:20px;"><canvas id="chartPieAcc"></canvas></div>
+      <div class="chart-wrap" style="height:440px;"><canvas id="chartPieVol"></canvas></div>
+    </section>
+
+    <section class="card">
+      <h2>APP 明細分析</h2>
+      <p class="desc" id="appDetailDesc">各 APP（投資先生／行動精靈／元大期貨精靈）逐月表現，及 APP 佔 AP＋APP 總業績之比重</p>
+      <div class="kpi-grid" id="kpiGridApp"></div>
+      <div class="chart-wrap tall" style="margin-bottom:20px;"><canvas id="chartAppRank"></canvas></div>
+      <div class="chart-wrap tall"><canvas id="chartAppMonthlyTrend"></canvas></div>
+      <p class="desc" style="margin-top:18px;">APP 合計實動戶數與成交口數趨勢（觀察客戶活躍度是否同步交易量）</p>
+      <div class="chart-wrap"><canvas id="chartAppAccVol"></canvas></div>
+      <p class="desc" style="margin-top:18px;">APP 佔 AP＋APP 總業績比例（逐月，不含 API／DMA）</p>
+      <div class="chart-wrap"><canvas id="chartAppShare"></canvas></div>
+    </section>
+
+    <section class="card">
+      <h2>AP 明細分析</h2>
+      <p class="desc" id="apDetailDesc">各 AP 平台（iTRADER／點金靈／YMF／EasyWin／YesWin／財富888／其它等）逐月表現，及 AP 佔 AP＋APP 總業績之比重</p>
+      <div class="kpi-grid" id="kpiGridAp"></div>
+      <div class="chart-wrap tall" style="margin-bottom:20px;"><canvas id="chartApRank"></canvas></div>
+      <div class="chart-wrap tall"><canvas id="chartApMonthlyTrend"></canvas></div>
+      <p class="desc" style="margin-top:18px;">AP 合計實動戶數與成交口數趨勢（觀察客戶活躍度是否同步交易量；戶數為各平台加總，同戶跨平台下單會重複計入，僅供參考）</p>
+      <div class="chart-wrap"><canvas id="chartApAccVol"></canvas></div>
+      <p class="desc" style="margin-top:18px;">AP 佔 AP＋APP 總業績比例（逐月，不含 API／DMA）</p>
+      <div class="chart-wrap"><canvas id="chartApShare"></canvas></div>
+    </section>
+
+    <section class="card" id="sec1-monthly-trend">
       <h2>月度趨勢：實動戶數／筆數／業績</h2>
       <p class="desc" id="trendDesc">各月全通路（AP＋APP＋API＋DMA）加總趨勢</p>
       <div class="segbtns" id="trendFilterBtns">
@@ -396,47 +461,23 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         <button data-filter="API">API</button>
         <button data-filter="DMA">DMA</button>
       </div>
-      <div class="row2">
-        <div class="chart-wrap short"><canvas id="chartTrendAcc"></canvas></div>
-        <div class="chart-wrap short"><canvas id="chartTrendOrders"></canvas></div>
-        <div class="chart-wrap short"><canvas id="chartTrendVol"></canvas></div>
+      <div class="segbtns" id="monthlyTrendPeriodBtns">
+        <button data-period="12">近12個月</button>
+        <button data-period="24">近24個月</button>
+        <button data-period="all" class="active">全部</button>
       </div>
-    </section>
-
-    <section class="card">
-      <h2>當月業績與戶數佔比（全平台圓餅圖）</h2>
-      <p class="desc" id="pieDesc">依最新月資料，AP／APP 所有平台合併統計</p>
-      <div class="row2">
-        <div class="chart-wrap tall"><canvas id="chartPieAcc"></canvas></div>
-        <div class="chart-wrap tall"><canvas id="chartPieVol"></canvas></div>
-      </div>
-    </section>
-
-    <section class="card">
-      <h2>APP 明細分析</h2>
-      <p class="desc" id="appDetailDesc">各 APP（投資先生／行動精靈／元大期貨精靈）逐月表現，及 APP 佔 AP＋APP 總業績之比重</p>
-      <div class="kpi-grid" id="kpiGridApp"></div>
-      <div class="row2">
-        <div class="chart-wrap"><canvas id="chartAppRank"></canvas></div>
-        <div class="chart-wrap"><canvas id="chartAppMonthlyTrend"></canvas></div>
-      </div>
-      <p class="desc" style="margin-top:18px;">APP 合計實動戶數與成交口數趨勢（觀察客戶活躍度是否同步交易量）</p>
-      <div class="chart-wrap"><canvas id="chartAppAccVol"></canvas></div>
-      <p class="desc" style="margin-top:18px;">APP 佔 AP＋APP 總業績比例（逐月，不含 API／DMA）</p>
-      <div class="chart-wrap"><canvas id="chartAppShare"></canvas></div>
+      <div class="chart-wrap tall" style="margin-bottom:20px;"><canvas id="chartTrendAcc"></canvas></div>
+      <div class="chart-wrap tall" style="margin-bottom:20px;"><canvas id="chartTrendOrders"></canvas></div>
+      <div class="chart-wrap tall"><canvas id="chartTrendVol"></canvas></div>
     </section>
   </div>
 
-  <!-- ============ ④ 數位服務與客戶數位化 ============ -->
+  <!-- ============ ② 數位服務與客戶數位化 ============ -->
   <div class="tabpanel" data-tabpanel="4" style="display:none;">
     <div class="kpi-groups" id="kpiGroups4">
       <div class="kpi-group">
         <div class="kpi-group-head"><span class="kpi-group-title">期貨市場與證券市場開戶數</span><a href="#sec4-acct" class="kpi-group-link">查看圖表 ↓</a></div>
         <div class="kpi-grid" id="kpiGrid4Acct"></div>
-      </div>
-      <div class="kpi-group">
-        <div class="kpi-group-head"><span class="kpi-group-title">線上開戶與官網瀏覽量</span><a href="#sec4-web" class="kpi-group-link">查看圖表 ↓</a></div>
-        <div class="kpi-grid" id="kpiGrid4Web"></div>
       </div>
       <div class="kpi-group">
         <div class="kpi-group-head"><span class="kpi-group-title">IB 加開期貨戶</span><a href="#sec4-ib" class="kpi-group-link">查看圖表 ↓</a></div>
@@ -450,6 +491,10 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         <div class="kpi-group-head"><span class="kpi-group-title">電子對帳單採用率</span><a href="#sec4-stmt" class="kpi-group-link">查看圖表 ↓</a></div>
         <div class="kpi-grid" id="kpiGrid4Stmt"></div>
       </div>
+      <div class="kpi-group">
+        <div class="kpi-group-head"><span class="kpi-group-title">線上開戶與官網瀏覽量</span><a href="#sec4-web" class="kpi-group-link">查看圖表 ↓</a></div>
+        <div class="kpi-grid" id="kpiGrid4Web"></div>
+      </div>
     </div>
 
     <section class="card" id="sec4-acct">
@@ -458,14 +503,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       <div class="acct-panels" id="acctPanels"></div>
       <p class="desc" style="margin-top:2px;">證券市場新開戶數（逐月）</p>
       <div class="chart-wrap tall"><canvas id="chartSecuritiesAccounts"></canvas></div>
-      <p class="desc" style="margin-top:18px;">期貨市場新開戶數（逐月）</p>
+      <p class="desc" id="futuresChartDesc" style="margin-top:18px;">期貨市場與元大期貨新開戶數（逐月）</p>
       <div class="chart-wrap tall"><canvas id="chartFuturesAccounts"></canvas></div>
-    </section>
-
-    <section class="card" id="sec4-web">
-      <h2>官網瀏覽量與線上開戶轉換</h2>
-      <p class="desc">柱狀＝官網每月瀏覽量；折線＝線上開戶數（雙軸對照觀察轉換效果）</p>
-      <div class="chart-wrap"><canvas id="chartWeb"></canvas></div>
     </section>
 
     <section class="card" id="sec4-ib">
@@ -496,6 +535,12 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       <div class="chart-wrap tall"><canvas id="chartStatement"></canvas></div>
       <p class="desc" style="margin-top:18px;">最新月國內／國外採用率比較</p>
       <div class="chart-wrap"><canvas id="chartStatementGrouped"></canvas></div>
+    </section>
+
+    <section class="card" id="sec4-web">
+      <h2>官網瀏覽量與線上開戶轉換</h2>
+      <p class="desc">柱狀＝官網每月瀏覽量；折線＝線上開戶數（雙軸對照觀察轉換效果）</p>
+      <div class="chart-wrap"><canvas id="chartWeb"></canvas></div>
     </section>
 
     <section class="card">
@@ -573,6 +618,12 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 
 <script>
 /* ===================== 常數與工具 ===================== */
+// 全站圖表滑鼠感應：改成「index」模式＋intersect:false，滑鼠只要在圖表上移到某個月份的垂直位置即可跳出數字，
+// 不需要精準碰到那個資料點（多數折線圖的點是隱形的 pointRadius:0，逐月資料點又多又密，精準點擊很困難）。
+// 一次設定套用到全部圖表，不用逐張圖表個別修改。
+Chart.defaults.interaction = {mode:'index', intersect:false};
+Chart.defaults.plugins.tooltip.mode = 'index';
+Chart.defaults.plugins.tooltip.intersect = false;
 const CHART_COLORS = {
   blue:'#1a56db', blueSoft:'rgba(26,86,219,.15)',
   gold:'#f97316', goldSoft:'rgba(249,115,22,.18)',
@@ -749,6 +800,21 @@ function parseAPPlatforms(wb){
   }
   return Array.from(byDate.values()).sort((a,b)=>a.date.localeCompare(b.date));
 }
+// 「AP電子業績」分頁只有單一公司別的資料（不像「電子業績」分頁依公司別拆成多個區塊），讀出表頭正上方的
+// 公司別標題列（例：「元大期貨含IB(國內外期貨)」），用來跟目前選取的公司別比對，判斷 API／DMA／戶均／
+// 委託筆均這些卡片是否屬於「目前這個公司別」——不屬於的話就不該顯示，避免誤導成是該公司的數字。
+function parseAPPlatformsEntity(wb){
+  const rows = sheetRows(wb,'AP電子業績');
+  if(!rows) return null;
+  for(let i=0;i<Math.min(rows.length,6);i++){
+    if(rows[i] && rows[i][0]==='日期'){
+      const titleRow = rows[i-1];
+      return (titleRow && titleRow[0]!=null) ? String(titleRow[0]).trim() : null;
+    }
+  }
+  return null;
+}
+function normEntityName(s){ return String(s||'').replace(/\s+/g,''); }
 // 「APP電子業績」分頁版面曾經改版：舊版左側多了「行動APP下載次數」欄位（A～C欄，即已移除的下載次數統計），
 // 把「期貨APP電子業績」表往右推到 E 欄開始；新版已移除下載次數欄位，表格直接從 A 欄開始。
 // 改用表頭列動態定位「投資先生」欄位起點，兩種版面都能正確解析，不受欄位偏移影響（也不受未來再改版影響，
@@ -805,15 +871,42 @@ function parseSocial(wb){
 function parseWebsite(wb){
   const rows = sheetRows(wb,'官網');
   if(!rows) return [];
+  // 「官網」分頁欄位曾經新增/移除過（例如期貨市場／證券市場新開戶數欄位的位置），固定欄位索引容易在
+  // 欄位增減後悄悄讀錯欄（不會報錯，只會讀到別的欄或讀到 undefined），改成依表頭文字動態定位比較穩妥：
+  // 第一列＝群組表頭（可能合併儲存格，如「FCM統計」橫跨日期／臨櫃開戶數／線上開戶數），第二列＝各欄小標。
+  let headerIdx = -1, subRow = null, groupRow = null;
+  for(let i=0;i<Math.min(rows.length,6);i++){
+    if(rows[i] && rows[i][0]==='日期'){ headerIdx=i; subRow=rows[i]; groupRow=rows[i-1]||[]; break; }
+  }
+  if(headerIdx===-1) return [];
+  let lastGroup = null;
+  const colGroup = subRow.map((_,c)=>{ if(groupRow[c]!=null) lastGroup = String(groupRow[c]).trim(); return lastGroup; });
+  let counterCol=-1, onlineCol=-1, pageviewsCol=-1, futuresCol=-1, securitiesCol=-1;
+  subRow.forEach((label,c)=>{
+    if(label==null) return;
+    const s = String(label).trim(), g = colGroup[c]||'';
+    if(counterCol===-1 && s.includes('臨櫃開戶數')) counterCol=c;
+    else if(onlineCol===-1 && s.includes('線上開戶數')) onlineCol=c;
+    else if(pageviewsCol===-1 && s.includes('網頁瀏覽量')) pageviewsCol=c;
+    else if(futuresCol===-1 && s.includes('新開戶數') && g.includes('期貨')) futuresCol=c;
+    else if(securitiesCol===-1 && s.includes('新開戶數') && g.includes('證券')) securitiesCol=c;
+  });
   const out=[];
   let baseOnlineAccounts = 0; // 「累計至YYYY」等期初彙總列的線上開戶數，作為累計加總的起始基準
-  for(let i=2;i<rows.length;i++){
+  for(let i=headerIdx+1;i<rows.length;i++){
     const r=rows[i]; if(!r) continue;
     if(!isYYYYMM(r[0])){
-      if(num(r[3])!=null) baseOnlineAccounts += num(r[3]);
+      if(onlineCol!==-1 && num(r[onlineCol])!=null) baseOnlineAccounts += num(r[onlineCol]);
       continue;
     }
-    out.push({date:normDate(r[0]), onlineAccounts:num(r[3]), digitalAccounts:num(r[4]), pageviews:num(r[5]), futuresMarketAccounts:num(r[6]), securitiesMarketAccounts:num(r[7])});
+    out.push({
+      date:normDate(r[0]),
+      counterAccounts: counterCol!==-1 ? num(r[counterCol]) : null,
+      onlineAccounts: onlineCol!==-1 ? num(r[onlineCol]) : null,
+      pageviews: pageviewsCol!==-1 ? num(r[pageviewsCol]) : null,
+      futuresMarketAccounts: futuresCol!==-1 ? num(r[futuresCol]) : null,
+      securitiesMarketAccounts: securitiesCol!==-1 ? num(r[securitiesCol]) : null
+    });
   }
   out.baseOnlineAccounts = baseOnlineAccounts; // 每月線上開戶數＝當月新增，非累計；此欄位供計算累計總數用
   return out;
@@ -983,10 +1076,16 @@ function combinedPlatformsRange(apPlat, appPerf, dates){
 
 /* ===================== 渲染 ===================== */
 let charts = {};
-let lastApPlat = [], lastAppPerf = [];
+let lastApPlat = [], lastAppPerf = [], lastApPlatEntity = null;
 let trendFilter = 'all';
 let platformRankFilter = 'all';
 let lastMonthlyPlatforms = [], lastPlatformRankDate = '';
+// 區間切換鈕（近12個月／近24個月／全部）用的全域狀態：資料點多、逐月密集的折線圖，
+// 讓使用者可自行縮短X軸區間，數字更容易看清楚（搭配上方 Chart.defaults 的 index 模式一起用）
+let elecTrendPeriod = 'all';
+let platformRankPeriod = 'all';
+let monthlyTrendPeriod = 'all';
+function periodLabel(period){ return period==='all' ? '全部區間' : `近 ${period} 個月`; }
 let lastElecAll = {}, currentElecEntity = null, lastNonElecData = {};
 function destroyCharts(){ Object.values(charts).forEach(c=>c && c.destroy()); charts={}; }
 
@@ -1010,6 +1109,7 @@ function renderDashboard(wb){
 
   lastElecAll = elecAll;
   lastApPlat = apPlat; lastAppPerf = appPerf;
+  lastApPlatEntity = parseAPPlatformsEntity(wb);
   lastNonElecData = {appPerf, social, website, statement, domains};
   const entityKeys = Object.keys(elecAll);
   currentElecEntity = entityKeys[0] || null;
@@ -1018,7 +1118,7 @@ function renderDashboard(wb){
 
   renderPlatformDetail(apPlat, appPerf);
   renderSocialWebCharts(social, website);
-  renderAccountOpeningSection(website);
+  renderAccountOpeningSection(website, ibFutures);
   renderIBFuturesSection(ibFutures);
   renderTripleOpenSection(tripleOpen);
   renderStatementChart(statement);
@@ -1102,8 +1202,8 @@ function renderChannelBarAndDualAxis(elec){
 
   const channelBarDesc = document.getElementById('channelBarDesc');
   if(channelBarDesc) channelBarDesc.textContent = hasApiDma
-    ? '左：各通路（AP／APP／網站／API／DMA）成交口數堆疊柱狀圖（AP 已扣除 API、DMA，兩者獨立成類）；右：實動戶數與成交口數雙軸對照，觀察戶數與交易量是否同步成長'
-    : '左：各通路（AP／APP／網站）成交口數堆疊柱狀圖；右：實動戶數與成交口數雙軸對照，觀察戶數與交易量是否同步成長';
+    ? '上：各通路（AP／APP／網站／API／DMA）成交口數堆疊柱狀圖（AP 已扣除 API、DMA，兩者獨立成類）；下：實動戶數與成交口數雙軸對照，觀察戶數與交易量是否同步成長'
+    : '上：各通路（AP／APP／網站）成交口數堆疊柱狀圖；下：實動戶數與成交口數雙軸對照，觀察戶數與交易量是否同步成長';
 
   charts.channelBar = new Chart(document.getElementById('chartChannelBar'), {
     type:'bar',
@@ -1172,6 +1272,7 @@ function renderGrowthTable(elec){
     const yoyCell = r.type==='pp' ? deltaCellPP(r.cur, r.prevY) : deltaCellPct(r.cur, r.prevY);
     return `<tr><td>${r.label}</td><td>${r.fmt(r.cur)}</td>${momCell}${yoyCell}</tr>`;
   }).join('');
+  enableTableSort('growthTable');
 }
 
 /* ===================== 季節性熱力圖（年 × 月） ===================== */
@@ -1248,6 +1349,7 @@ function renderAnomalyTable(elec){
       <td class="delta ${a.z>=0?'pos':'neg'}">${a.z>=0?'+':''}${a.z.toFixed(2)}σ</td>
       <td>${a.z>=0?'異常偏高':'異常偏低'}</td>
     </tr>`).join('') : '<tr><td colspan="5">近期資料無明顯異常（|Z|&lt;2）</td></tr>';
+  enableTableSort('anomalyTable');
 }
 
 // 月增減率（log return）Z-score 異常偵測：與上方「絕對水位異常」互補。
@@ -1292,6 +1394,7 @@ function renderReturnAnomalyTable(elec){
       <td class="delta ${a.z>=0?'pos':'neg'}">${a.z>=0?'+':''}${a.z.toFixed(2)}σ</td>
       <td>${a.z>=0?'急遽上升':'急遽下降'}</td>
     </tr>`).join('') : '<tr><td colspan="5">近期資料無明顯急遽轉折（|Z|&lt;2）</td></tr>';
+  enableTableSort('returnAnomalyTable');
 }
 
 /* ===================== 跨資料源關聯 ===================== */
@@ -1387,7 +1490,6 @@ function kpiCard(label, value, sub, alert, detail){
   }
   return div;
 }
-
 /* ===================== KPI 明細彈窗（點擊 KPI 卡片顯示逐月明細） ===================== */
 function lastN(arr, n){ return arr.slice(Math.max(0, arr.length-n)); }
 function openKpiModal(title, sub, rows, fmt){
@@ -1430,9 +1532,18 @@ function ibContribSuffix(date, getMetric){
   if(numer==null || denom==null || !denom) return '';
   return `・元證IB貢獻率 ${(numer/denom*100).toFixed(1)}%`;
 }
+// 頁籤①最上方 KPI 依邏輯分成 4 組，各自對應獨立的 grid 容器：
+//  整體總覽：電子口數佔比／總電子口數／總業績口數
+//  成交口數（依平台）：AP／APP／API／DMA
+//  實動戶與委託：實動戶數／委託筆數
+//  平均效能指標：戶均成交口數／委託筆均成交口數
 function renderKPIs({elec, latestElec, appPerf, social, website, statement, domains}){
-  const grid = document.getElementById('kpiGrid');
-  grid.innerHTML='';
+  const gridOverview = document.getElementById('kpiGridOverview');
+  const gridChannel = document.getElementById('kpiGridChannel');
+  const gridAccount = document.getElementById('kpiGridAccount');
+  const gridAvg = document.getElementById('kpiGridAvg');
+  gridOverview.innerHTML=''; gridChannel.innerHTML=''; gridAccount.innerHTML=''; gridAvg.innerHTML='';
+  let webCard = null; // 網站成交口數卡片：先建立，最後才插入 gridChannel，確保排在 DMA 成交口數之後
   if(latestElec){
     const m = dateLabel(latestElec.date)+' 當月';
     const d = latestElec.date;
@@ -1443,75 +1554,70 @@ function renderKPIs({elec, latestElec, appPerf, social, website, statement, doma
       title, sub: detailSub, fmt,
       rows: lastN(elec,12).map(e=>({date:e.date, value:getMetric(e)}))
     });
-    grid.appendChild(kpiCard('電子口數佔比', fmtPct(latestElec.ratio), m, false,
-      mkDetail('電子口數佔比・逐月明細', e=>e.ratio, fmtPct)));
-    grid.appendChild(kpiCard('總電子口數', fmtInt(latestElec.totalVol), m+'・電子下單合計'+ibContribSuffix(d,e=>e.totalVol), false,
-      mkDetail('總電子口數・逐月明細', e=>e.totalVol, fmtInt)));
-    grid.appendChild(kpiCard('總業績口數', fmtInt(latestElec.grandVol), m+'・含非電子通路'+ibContribSuffix(d,e=>e.grandVol), false,
+    gridOverview.appendChild(kpiCard('總業績口數', fmtInt(latestElec.grandVol), m+'・含非電子通路'+ibContribSuffix(d,e=>e.grandVol), false,
       mkDetail('總業績口數・逐月明細', e=>e.grandVol, fmtInt)));
-    grid.appendChild(kpiCard('AP 成交口數', fmtInt(latestElec.ap.vol), latestElec.api ? m+'・已扣除 API／DMA' : m, false,
+    gridOverview.appendChild(kpiCard('總電子口數', fmtInt(latestElec.totalVol), m+'・電子下單合計'+ibContribSuffix(d,e=>e.totalVol), false,
+      mkDetail('總電子口數・逐月明細', e=>e.totalVol, fmtInt)));
+    gridOverview.appendChild(kpiCard('電子口數佔比', fmtPct(latestElec.ratio), m, false,
+      mkDetail('電子口數佔比・逐月明細', e=>e.ratio, fmtPct)));
+    gridChannel.appendChild(kpiCard('AP 成交口數', fmtInt(latestElec.ap.vol), latestElec.api ? m+'・已扣除 API／DMA' : m, false,
       mkDetail('AP 成交口數・逐月明細', e=>e.ap.vol, fmtInt)));
-    grid.appendChild(kpiCard('APP 成交口數', fmtInt(latestElec.app.vol), m+'・含證券XQ、行動點金靈', false,
+    gridChannel.appendChild(kpiCard('APP 成交口數', fmtInt(latestElec.app.vol), m+'・含證券XQ、行動點金靈', false,
       mkDetail('APP 成交口數・逐月明細', e=>e.app.vol, fmtInt)));
-    grid.appendChild(kpiCard('實動戶數', fmtInt(latestElec.totalAcc), m+'・net'+ibContribSuffix(d,e=>e.totalAcc), false,
+    webCard = kpiCard('網站成交口數', fmtInt(latestElec.web.vol), m, false,
+      mkDetail('網站成交口數・逐月明細', e=>e.web.vol, fmtInt));
+    gridAccount.appendChild(kpiCard('實動戶數', fmtInt(latestElec.totalAcc), m+'・net'+ibContribSuffix(d,e=>e.totalAcc), false,
       mkDetail('實動戶數（net）・逐月明細', e=>e.totalAcc, fmtInt)));
-    grid.appendChild(kpiCard('委託筆數', fmtInt(totalOrders), m+'・三通路合計（AP／APP／網站）'+ibContribSuffix(d,totalOrdersOf), false,
+    gridAccount.appendChild(kpiCard('委託筆數', fmtInt(totalOrders), m+'・三通路合計（AP／APP／網站）'+ibContribSuffix(d,totalOrdersOf), false,
       mkDetail('委託筆數・逐月明細', totalOrdersOf, fmtInt)));
   }
-  const latestStmt = statement.length ? lastNonNull(statement,'futuresDomestic') : null;
-  if(latestStmt){
-    grid.appendChild(kpiCard('電子對帳單使用率', fmtPct(latestStmt.futuresDomestic), dateLabel(latestStmt.date)+'・期貨FCM國內', false, {
-      title:'電子對帳單使用率（期貨FCM國內）・逐月明細',
-      sub:`近 ${Math.min(12,statement.length)} 個月`,
-      fmt:fmtPct,
-      rows: lastN(statement,12).map(s=>({date:s.date, value:s.futuresDomestic}))
-    }));
+  // API／DMA 是獨立平台類別，資料來源是全平台加總（不隨上方公司別切換而變動），直接在這裡算好插入到
+  // 「成交口數（依平台）」與「平均效能指標」兩組；這樣切換公司別重跑 renderKPIs() 時才會一併補回，不會消失
+  if(lastApPlat.length || lastAppPerf.length){
+    const platDates = allPlatformDates(lastApPlat, lastAppPerf);
+    if(platDates.length){
+      const platLatestDate = platDates[platDates.length-1];
+      const platMonthly = combinedPlatformsForDate(lastApPlat, lastAppPerf, platLatestDate);
+      const apiVol = platMonthly.filter(p=>p.group==='API').reduce((s,p)=>s+p.vol,0);
+      const dmaVol = platMonthly.filter(p=>p.group==='DMA').reduce((s,p)=>s+p.vol,0);
+      const platTotalAcc = platMonthly.reduce((s,p)=>s+p.acc,0);
+      const platTotalVol = platMonthly.reduce((s,p)=>s+p.vol,0);
+      const platTotalOrders = platMonthly.reduce((s,p)=>s+p.orders,0);
+      const platSeries = lastN(platDates,12).map(date=>{
+        const list = combinedPlatformsForDate(lastApPlat, lastAppPerf, date);
+        return {
+          date,
+          apiVol: list.filter(p=>p.group==='API').reduce((s,p)=>s+p.vol,0),
+          dmaVol: list.filter(p=>p.group==='DMA').reduce((s,p)=>s+p.vol,0),
+          totalAcc: list.reduce((s,p)=>s+p.acc,0),
+          totalVol: list.reduce((s,p)=>s+p.vol,0),
+          totalOrders: list.reduce((s,p)=>s+p.orders,0)
+        };
+      });
+      const platM = dateLabel(platLatestDate)+' 當月';
+      const platSub = '全平台加總，不隨公司別變動';
+      // 「AP電子業績」「APP電子業績」兩個分頁本身只有單一公司別的資料（沒有依公司別拆分），
+      // API／DMA／戶均／委託筆均都是算自這兩個分頁，所以只在目前選取的公司別＝該分頁所屬公司別時才顯示，
+      // 避免切到其他公司別（例如元證IB分公司）時，誤把不屬於它的全公司數字當成它的數字呈現。
+      const platEntityMatches = !lastApPlatEntity || normEntityName(currentElecEntity)===normEntityName(lastApPlatEntity);
+      if(platEntityMatches){
+        gridChannel.appendChild(kpiCard('API 成交口數', apiVol?fmtInt(apiVol):'—', platM+'・獨立類別（'+platSub+'）', false,
+          {title:'API 成交口數・逐月明細', sub:`近 ${platSeries.length} 個月`, fmt:fmtInt, rows: platSeries.map(s=>({date:s.date, value:s.apiVol}))}));
+        gridChannel.appendChild(kpiCard('DMA 成交口數', dmaVol?fmtInt(dmaVol):'—', platM+'・獨立類別（'+platSub+'）', false,
+          {title:'DMA 成交口數・逐月明細', sub:`近 ${platSeries.length} 個月`, fmt:fmtInt, rows: platSeries.map(s=>({date:s.date, value:s.dmaVol}))}));
+        gridAvg.appendChild(kpiCard('戶均成交口數', platTotalAcc?(platTotalVol/platTotalAcc).toFixed(1):'—', platM+'・業績 ÷ 實動戶數（同戶跨平台下單會被重複計入戶數，僅供參考；'+platSub+'）', false,
+          {title:'戶均成交口數・逐月明細', sub:`近 ${platSeries.length} 個月`, fmt:v=>v.toFixed(1), rows: platSeries.map(s=>({date:s.date, value:s.totalAcc?s.totalVol/s.totalAcc:null}))}));
+        gridAvg.appendChild(kpiCard('委託筆均成交口數', platTotalOrders?(platTotalVol/platTotalOrders).toFixed(2):'—', platM+'・業績 ÷ 委託筆數（'+platSub+'）', false,
+          {title:'委託筆均成交口數・逐月明細', sub:`近 ${platSeries.length} 個月`, fmt:v=>v.toFixed(2), rows: platSeries.map(s=>({date:s.date, value:s.totalOrders?s.totalVol/s.totalOrders:null}))}));
+      }
+    }
   }
-}
-
-function renderKPIs2(apPlat, appPerf, monthly, latestDate){
-  const grid = document.getElementById('kpiGrid2');
-  if(!grid) return;
-  grid.innerHTML='';
-  if(!monthly.length) return;
-  const m = latestDate ? dateLabel(latestDate)+' 當月' : '當月';
-  const totalAcc = monthly.reduce((s,p)=>s+p.acc,0);
-  const totalVol = monthly.reduce((s,p)=>s+p.vol,0);
-  const totalOrders = monthly.reduce((s,p)=>s+p.orders,0);
-  const apVol = monthly.filter(p=>p.group==='AP').reduce((s,p)=>s+p.vol,0);
-  const appVol = monthly.filter(p=>p.group==='APP').reduce((s,p)=>s+p.vol,0);
-  const apiVol = monthly.filter(p=>p.group==='API').reduce((s,p)=>s+p.vol,0);
-  const dmaVol = monthly.filter(p=>p.group==='DMA').reduce((s,p)=>s+p.vol,0);
-
-  // 逐月明細：對每個月份重新彙整各平台分類加總，供 KPI 卡片點擊查看
-  const allDates = lastN(allPlatformDates(apPlat, appPerf), 12);
-  const monthlySeries = allDates.map(date=>{
-    const list = combinedPlatformsForDate(apPlat, appPerf, date);
-    const gv = g => list.filter(p=>p.group===g).reduce((s,p)=>s+p.vol,0);
-    return {
-      date, apVol:gv('AP'), appVol:gv('APP'), apiVol:gv('API'), dmaVol:gv('DMA'),
-      totalAcc: list.reduce((s,p)=>s+p.acc,0),
-      totalVol: list.reduce((s,p)=>s+p.vol,0),
-      totalOrders: list.reduce((s,p)=>s+p.orders,0)
-    };
-  });
-  const mkDetail2 = (title, getMetric, fmt) => ({
-    title, sub:`近 ${monthlySeries.length} 個月`, fmt,
-    rows: monthlySeries.map(s=>({date:s.date, value:getMetric(s)}))
-  });
-
-  grid.appendChild(kpiCard('AP 總成交口數', fmtInt(apVol), m+'・AP 分類全平台加總（不含 API／DMA）', false,
-    mkDetail2('AP 總成交口數・逐月明細', s=>s.apVol, fmtInt)));
-  grid.appendChild(kpiCard('APP 總成交口數', fmtInt(appVol), m+'・APP 分類全平台加總', false,
-    mkDetail2('APP 總成交口數・逐月明細', s=>s.appVol, fmtInt)));
-  grid.appendChild(kpiCard('API 成交口數', apiVol?fmtInt(apiVol):'—', m+'・獨立類別', false,
-    mkDetail2('API 成交口數・逐月明細', s=>s.apiVol, fmtInt)));
-  grid.appendChild(kpiCard('DMA 成交口數', dmaVol?fmtInt(dmaVol):'—', m+'・獨立類別', false,
-    mkDetail2('DMA 成交口數・逐月明細', s=>s.dmaVol, fmtInt)));
-  grid.appendChild(kpiCard('戶均成交口數', totalAcc?(totalVol/totalAcc).toFixed(1):'—', m+'・業績 ÷ 實動戶數（同戶跨平台下單會被重複計入戶數，僅供參考）', false,
-    mkDetail2('戶均成交口數・逐月明細', s=>s.totalAcc?s.totalVol/s.totalAcc:null, v=>v.toFixed(1))));
-  grid.appendChild(kpiCard('委託筆均成交口數', totalOrders?(totalVol/totalOrders).toFixed(2):'—', m+'・業績 ÷ 委託筆數', false,
-    mkDetail2('委託筆均成交口數・逐月明細', s=>s.totalOrders?s.totalVol/s.totalOrders:null, v=>v.toFixed(2))));
+  if(webCard) gridChannel.appendChild(webCard); // 排在 AP／APP／API／DMA 之後，維持與 DMA 成交口數相鄰在最後一張
+  // 「平均效能指標」整組卡片都來自 AP電子業績／APP電子業績 分頁，若目前公司別不是該分頁所屬公司別
+  // （例如選到元證IB分公司），gridAvg 會是空的；此時把整個分組（含標題與查看圖表連結）一併隱藏，
+  // 避免畫面留下一個只有標題、底下空白的區塊
+  const avgGroup = gridAvg.closest('.kpi-group');
+  if(avgGroup) avgGroup.style.display = gridAvg.children.length ? '' : 'none';
 }
 
 // Tab② 新增：APP 明細分析 KPI 卡片（原第③頁「行動APP下載與推廣成效」的APP相關卡片搬移至此；
@@ -1555,6 +1661,56 @@ function renderKPIsApp(appPerf, apPlat){
     const latestShare = shareSeries.length ? shareSeries[shareSeries.length-1] : null;
     grid.appendChild(kpiCard('APP 佔 AP＋APP 業績比例', latestShare?fmtPct(latestShare.value):'—', latestShare?dateLabel(latestShare.date)+' 當月・不含API／DMA':'—', false,
       {title:'APP 佔 AP＋APP 業績比例・逐月明細', sub:`近 ${shareSeries.length} 個月`, fmt:fmtPct, rows:shareSeries}));
+  }
+}
+
+// Tab② 新增：AP 明細分析 KPI 卡片（比照「APP 明細分析」，資料來源改為「AP電子業績」分頁，
+// 只加總分類為 AP 的平台（iTRADER／點金靈／YMF／EasyWin／YesWin／財富888／其它等），
+// 不含 API／元大Speedy／Multicharts／DMA——這些已獨立列在上方「成交口數（依平台）」分組，避免重複呈現。
+// 「AP電子業績」分頁本身沒有去重後的合計戶數欄位可用（該分頁合計欄含 API／DMA，口徑不同），
+// 故此處戶數為各平台直接加總，同戶跨平台下單會重複計入，卡片註記僅供參考，與「平均效能指標」戶均卡片用語一致。
+function renderKPIsAp(apPlat, appPerf){
+  const grid = document.getElementById('kpiGridAp');
+  if(!grid) return;
+  grid.innerHTML='';
+  if(!apPlat.length) return;
+  const apSeries = apPlat.map(r=>{
+    const entries = Object.entries(r.platforms).filter(([name])=>classifyPlatformGroup('AP',name)==='AP');
+    return {
+      date:r.date,
+      vol: entries.reduce((s,[,p])=>s+(p.vol||0),0),
+      orders: entries.reduce((s,[,p])=>s+(p.orders||0),0),
+      acc: entries.reduce((s,[,p])=>s+(p.acc||0),0)
+    };
+  });
+  const latest = lastNonNull(apSeries,'acc');
+  if(!latest) return;
+  const series12 = lastN(apSeries,12);
+  const mkDetailAp = (title, getMetric, fmt) => ({
+    title, sub:`近 ${series12.length} 個月`, fmt,
+    rows: series12.map(s=>({date:s.date, value:getMetric(s)}))
+  });
+  grid.appendChild(kpiCard('AP 總成交口數', fmtInt(latest.vol), dateLabel(latest.date)+' 當月', false,
+    mkDetailAp('AP 總成交口數・逐月明細', s=>s.vol, fmtInt)));
+  grid.appendChild(kpiCard('AP 實動戶數', fmtInt(latest.acc), dateLabel(latest.date)+'・各平台加總（同戶跨平台下單會重複計入，僅供參考）', false,
+    mkDetailAp('AP 實動戶數・逐月明細', s=>s.acc, fmtInt)));
+  grid.appendChild(kpiCard('AP 委託筆數', fmtInt(latest.orders), dateLabel(latest.date)+' 當月', false,
+    mkDetailAp('AP 委託筆數・逐月明細', s=>s.orders, fmtInt)));
+  grid.appendChild(kpiCard('AP 戶均成交口數', latest.acc?(latest.vol/latest.acc).toFixed(1):'—', dateLabel(latest.date)+' 當月', false,
+    mkDetailAp('AP 戶均成交口數・逐月明細', s=>s.acc?s.vol/s.acc:null, v=>v.toFixed(1))));
+
+  // AP 佔 AP+APP 總業績比例（不含 API／DMA），與下方 chartApShare、renderKPIsApp 裡的 APP 佔比卡片同口徑
+  if(appPerf.length){
+    const shareDates = lastN(allPlatformDates(apPlat, appPerf), 12);
+    const shareSeries = shareDates.map(date=>{
+      const list = combinedPlatformsForDate(apPlat, appPerf, date);
+      const apVol = list.filter(p=>p.group==='AP').reduce((s,p)=>s+p.vol,0);
+      const appVol = list.filter(p=>p.group==='APP').reduce((s,p)=>s+p.vol,0);
+      return {date, value:(apVol+appVol)?apVol/(apVol+appVol):null};
+    });
+    const latestShare = shareSeries.length ? shareSeries[shareSeries.length-1] : null;
+    grid.appendChild(kpiCard('AP 佔 AP＋APP 業績比例', latestShare?fmtPct(latestShare.value):'—', latestShare?dateLabel(latestShare.date)+' 當月・不含API／DMA':'—', false,
+      {title:'AP 佔 AP＋APP 業績比例・逐月明細', sub:`近 ${shareSeries.length} 個月`, fmt:fmtPct, rows:shareSeries}));
   }
 }
 
@@ -1689,9 +1845,12 @@ function narrowScales(){
 }
 
 // 各通路（AP／APP／網站）實動戶數、委託筆數、業績口數三張趨勢折線圖
-function renderElecChannelTrendCharts(elec){
+function renderElecChannelTrendCharts(elecFull){
   ['elecAcc','elecOrders','elecVol'].forEach(k=>{ if(charts[k]) charts[k].destroy(); });
-  if(!elec.length) return;
+  if(!elecFull.length) return;
+  const elec = elecTrendPeriod==='all' ? elecFull : lastN(elecFull, parseInt(elecTrendPeriod,10));
+  const descEl = document.getElementById('elecTrendDesc');
+  if(descEl) descEl.textContent = `各通路（AP／APP／網站）實動戶數、委託筆數、業績口數趨勢（${periodLabel(elecTrendPeriod)}）`;
   const labels = elec.map(e=>dateLabel(e.date));
   const channelDefs = [
     {key:'ap', label:'AP', color:CHART_COLORS.blue, soft:CHART_COLORS.blueSoft},
@@ -1763,12 +1922,15 @@ function renderPlatformTable(tableId, chipsId, platforms){
   table.querySelector('tfoot').innerHTML = sorted.length ? `<tr>
       <td colspan="2">總計</td><td>${fmtInt(totalAcc)}</td><td>100%</td><td>${fmtInt(totalVol)}</td><td>100%</td><td>${totalAcc?(totalVol/totalAcc).toFixed(1):'—'}</td><td>—</td>
     </tr>` : '';
+  enableTableSort(tableId);
 }
 
-function renderPlatformTrendCharts(apPlat, appPerf, filter){
+function renderPlatformTrendCharts(apPlat, appPerf, filter, period){
   filter = filter || 'all';
+  period = period || 'all';
   ['trendAcc','trendOrders','trendVol'].forEach(k=>{ if(charts[k]) charts[k].destroy(); });
-  const dates = allPlatformDates(apPlat, appPerf);
+  let dates = allPlatformDates(apPlat, appPerf);
+  if(period!=='all') dates = lastN(dates, parseInt(period,10));
   if(!dates.length) return;
   const labels = dates.map(dateLabel);
   const accArr=[], ordersArr=[], volArr=[];
@@ -1779,7 +1941,7 @@ function renderPlatformTrendCharts(apPlat, appPerf, filter){
     ordersArr.push(list.reduce((s,p)=>s+p.orders,0));
     volArr.push(list.reduce((s,p)=>s+p.vol,0));
   });
-  const filterLabel = filter==='all' ? '全通路合計' : filter+' 合計';
+  const filterLabel = (filter==='all' ? '全通路合計' : filter+' 合計') + '・' + periodLabel(period);
   const mkLineOpt = title => ({
     responsive:true, maintainAspectRatio:false,
     plugins:{legend:{display:false}, title:{display:true, text:title, font:{size:12}}},
@@ -1802,6 +1964,29 @@ function renderPlatformTrendCharts(apPlat, appPerf, filter){
   });
 }
 
+// 圓餅圖的圖例文字附上佔比（不在切片上畫字，只在旁邊的標籤清單顯示，避免切片上的文字互相重疊）
+function pieLegendLabels(){
+  return {
+    boxWidth:10, font:{size:10},
+    generateLabels(chart){
+      const ds = chart.data.datasets[0];
+      if(!ds) return [];
+      const total = ds.data.reduce((s,v)=>s+(v||0),0);
+      return chart.data.labels.map((label,i)=>{
+        const v = ds.data[i];
+        const pct = total ? (v/total*100) : 0;
+        return {
+          text: `${label}（${pct.toFixed(1)}%）`,
+          fillStyle: ds.backgroundColor[i],
+          strokeStyle: ds.backgroundColor[i],
+          lineWidth: 0,
+          hidden: !chart.getDataVisibility(i),
+          index: i
+        };
+      });
+    }
+  };
+}
 function renderPlatformPies(platforms, dateStr){
   if(charts.pieVol) charts.pieVol.destroy();
   if(charts.pieAcc) charts.pieAcc.destroy();
@@ -1809,18 +1994,22 @@ function renderPlatformPies(platforms, dateStr){
   if(pieDesc) pieDesc.textContent = `依 ${dateLabel(dateStr)} 資料，AP／APP／API／DMA 所有平台合併統計`;
   if(!platforms.length) return;
   const byVol = platforms.slice().sort((a,b)=>b.vol-a.vol);
+  const volTotal = byVol.reduce((s,p)=>s+(p.vol||0),0);
   charts.pieVol = new Chart(document.getElementById('chartPieVol'), {
     type:'pie',
     data:{labels:byVol.map(platformLabel), datasets:[{data:byVol.map(p=>p.vol), backgroundColor:pieColorsFor(byVol.length)}]},
     options:{responsive:true, maintainAspectRatio:false,
-      plugins:{legend:{position:'right', labels:{boxWidth:10,font:{size:10}}}, title:{display:true, text:'業績（成交口數）', align:'start', font:{size:13}}}}
+      plugins:{legend:{position:'right', labels:pieLegendLabels()}, title:{display:true, text:'業績（成交口數）', align:'start', font:{size:13}},
+        tooltip:{callbacks:{label:c=>`${c.label}：${fmtInt(c.parsed)}（${volTotal?(c.parsed/volTotal*100).toFixed(1):'0.0'}%）`}}}}
   });
   const byAcc = platforms.slice().sort((a,b)=>b.acc-a.acc);
+  const accTotal = byAcc.reduce((s,p)=>s+(p.acc||0),0);
   charts.pieAcc = new Chart(document.getElementById('chartPieAcc'), {
     type:'pie',
     data:{labels:byAcc.map(platformLabel), datasets:[{data:byAcc.map(p=>p.acc), backgroundColor:pieColorsFor(byAcc.length)}]},
     options:{responsive:true, maintainAspectRatio:false,
-      plugins:{legend:{position:'right', labels:{boxWidth:10,font:{size:10}}}, title:{display:true, text:'實動戶數', align:'start', font:{size:13}}}}
+      plugins:{legend:{position:'right', labels:pieLegendLabels()}, title:{display:true, text:'實動戶數', align:'start', font:{size:13}},
+        tooltip:{callbacks:{label:c=>`${c.label}：${fmtInt(c.parsed)}（${accTotal?(c.parsed/accTotal*100).toFixed(1):'0.0'}%）`}}}}
   });
 }
 
@@ -1843,17 +2032,19 @@ function renderPlatformDetail(apPlat, appPerf){
   const ytdDesc = document.getElementById('ytdTableDesc');
   if(ytdDesc) ytdDesc.textContent = `${dateLabel(ytdDates[0])}－${dateLabel(latestDate)} 累計（實動戶數為各月加總，如平台跨月有重複帳戶，數字可能高估，僅供參考）`;
 
-  renderPlatformTrendCharts(apPlat, appPerf, trendFilter);
+  renderPlatformTrendCharts(apPlat, appPerf, trendFilter, monthlyTrendPeriod);
   renderPlatformPies(monthly, latestDate);
-  renderKPIs2(apPlat, appPerf, monthly, latestDate);
   renderPlatformRankChart(monthly, latestDate, platformRankFilter);
   renderApiDmaTrend(apPlat);
   renderShareTrend(apPlat, appPerf, monthly, dates);
   renderKPIsApp(appPerf, apPlat);
   renderAppDetailCharts(apPlat, appPerf);
+  renderKPIsAp(apPlat, appPerf);
+  renderApDetailCharts(apPlat, appPerf);
 }
 
-// Tab② KPI 已在上方 renderKPIs2 定義處處理；以下為新增的三張圖表
+// Tab① 交易通路相關 KPI（AP/APP/API/DMA/戶均/委託筆均）已併入上方 renderKPIs() 的「成交口數（依平台）」／
+// 「平均效能指標」分組 grid；以下為新增的三張圖表
 
 // 橫向長條圖：各平台成交口數排名（當月）
 function renderPlatformRankChart(monthly, latestDate, filter){
@@ -1945,7 +2136,7 @@ function renderShareTrend(apPlat, appPerf, monthly, dates){
     if(desc) desc.textContent = trendFilter==='all'
       ? '各月全通路（AP＋APP＋API＋DMA）加總趨勢'
       : `各月 ${trendFilter} 通路加總趨勢`;
-    if(lastApPlat.length || lastAppPerf.length) renderPlatformTrendCharts(lastApPlat, lastAppPerf, trendFilter);
+    if(lastApPlat.length || lastAppPerf.length) renderPlatformTrendCharts(lastApPlat, lastAppPerf, trendFilter, monthlyTrendPeriod);
   });
 })();
 
@@ -1962,9 +2153,48 @@ function renderShareTrend(apPlat, appPerf, monthly, dates){
     if(desc) desc.textContent = platformRankFilter==='all'
       ? '依業績（成交口數）排序；下方為 API／DMA 成交口數趨勢，及前 5 大平台＋其他之占比堆疊趨勢'
       : `依業績（成交口數）排序，僅顯示 ${platformRankFilter} 平台；下方為 API／DMA 成交口數趨勢，及前 5 大平台＋其他之占比堆疊趨勢`;
-    if(lastMonthlyPlatforms.length) renderPlatformRankChart(lastMonthlyPlatforms, lastPlatformRankDate, platformRankFilter);
+    if(lastMonthlyPlatforms.length){
+      renderPlatformRankChart(lastMonthlyPlatforms, lastPlatformRankDate, platformRankFilter);
+    }
   });
 })();
+
+/* 區間切換鈕共用的綁定函式：近12個月／近24個月／全部，用來縮短密集折線圖的X軸區間，方便看數字 */
+function bindPeriodButtons(boxId, onChange){
+  const box = document.getElementById(boxId);
+  if(!box) return;
+  box.addEventListener('click', e=>{
+    const btn = e.target.closest('button[data-period]');
+    if(!btn) return;
+    box.querySelectorAll('button').forEach(b=>b.classList.toggle('active', b===btn));
+    onChange(btn.dataset.period);
+  });
+}
+
+/* ①電子業績趨勢：區間切換鈕 */
+bindPeriodButtons('elecTrendPeriodBtns', period=>{
+  elecTrendPeriod = period;
+  if(Object.keys(lastElecAll).length) renderElecSection();
+});
+
+/* ②平台排名與結構變化：區間切換鈕（僅影響下方 API／DMA 趨勢＋前5大平台占比趨勢兩張圖，排名長條圖固定看當月） */
+bindPeriodButtons('platformRankPeriodBtns', period=>{
+  platformRankPeriod = period;
+  const desc = document.getElementById('platformRankPeriodDesc');
+  if(desc) desc.textContent = `下方兩張趨勢圖區間：${periodLabel(platformRankPeriod)}`;
+  if(!lastApPlat.length && !lastAppPerf.length) return;
+  const apPlatScoped = platformRankPeriod==='all' ? lastApPlat : lastN(lastApPlat, parseInt(platformRankPeriod,10));
+  renderApiDmaTrend(apPlatScoped);
+  let dates = allPlatformDates(lastApPlat, lastAppPerf);
+  if(platformRankPeriod!=='all') dates = lastN(dates, parseInt(platformRankPeriod,10));
+  renderShareTrend(lastApPlat, lastAppPerf, lastMonthlyPlatforms, dates);
+});
+
+/* ②月度趨勢：區間切換鈕（與AP／APP／API／DMA分類篩選鈕並存） */
+bindPeriodButtons('monthlyTrendPeriodBtns', period=>{
+  monthlyTrendPeriod = period;
+  if(lastApPlat.length || lastAppPerf.length) renderPlatformTrendCharts(lastApPlat, lastAppPerf, trendFilter, monthlyTrendPeriod);
+});
 
 function renderSocialWebCharts(social, website){
   if(charts.social) charts.social.destroy();
@@ -2118,20 +2348,36 @@ const acctPointValueLabelsPlugin = {
     });
   }
 };
-function renderAccountOpeningSection(website){
+// 元大期貨新開戶數＝官網分頁「FCM統計」臨櫃開戶數＋線上開戶數，加上「IB 加開期貨戶」分頁的臨櫃＋線上
+// 開戶完成數（N欄）；三個來源按日期合併，任一月份三者皆無資料才視為無資料（null），其餘缺的來源當 0 計入。
+function buildYuantaFuturesNewAccounts(website, ibFutures){
+  const ibByDate = new Map((ibFutures||[]).map(w=>[w.date, w.completeTotal]));
+  return website.map(w=>{
+    const ibComplete = ibByDate.has(w.date) ? ibByDate.get(w.date) : null;
+    if(w.counterAccounts==null && w.onlineAccounts==null && ibComplete==null) return {date:w.date, value:null};
+    return {date:w.date, value:(w.counterAccounts||0)+(w.onlineAccounts||0)+(ibComplete||0)};
+  });
+}
+function renderAccountOpeningSection(website, ibFutures){
   ['securitiesAccounts','futuresAccounts'].forEach(k=>{ if(charts[k]) charts[k].destroy(); });
   const panelBox = document.getElementById('acctPanels');
   const descEl = document.getElementById('acctPanelDesc');
   const secStats = computeAccountYearStats(website, 'securitiesMarketAccounts');
   const futStats = computeAccountYearStats(website, 'futuresMarketAccounts');
+  const yfSeries = buildYuantaFuturesNewAccounts(website, ibFutures);
+  const yfByDate = new Map(yfSeries.map(s=>[s.date, s.value]));
+  const yfStats = computeAccountYearStats(yfSeries, 'value');
+  const futuresDescEl = document.getElementById('futuresChartDesc');
+  if(futuresDescEl) futuresDescEl.textContent = '期貨市場與元大期貨新開戶數（逐月）；元大期貨＝「官網」分頁 FCM統計 臨櫃＋線上開戶數，加計「IB 加開期貨戶」分頁臨櫃＋線上開戶完成數';
   if(panelBox){
     panelBox.innerHTML = '';
     panelBox.appendChild(buildAcctPanel('證券市場開戶數', 'securities', secStats));
     panelBox.appendChild(buildAcctPanel('期貨市場開戶數', 'futures', futStats));
+    panelBox.appendChild(buildAcctPanel('元大期貨開戶數', 'yuanta', yfStats));
   }
   const refStats = secStats || futStats;
   if(descEl) descEl.textContent = refStats
-    ? `依「官網」分頁新增之期貨市場／證券市場新開戶數欄位計算；圖表與累積數字統計區間為 ${refStats.prevYear}/01 － ${dateLabel(refStats.latestDate)}`
+    ? `依「官網」分頁期貨市場／證券市場新開戶數欄位計算，元大期貨開戶數另加計「IB 加開期貨戶」分頁；圖表與累積數字統計區間為 ${refStats.prevYear}/01 － ${dateLabel(refStats.latestDate)}`
     : '依「官網」分頁新增之期貨市場／證券市場新開戶數欄位計算（目前無資料，請確認「官網」分頁 G、H 欄）';
 
   if(secStats && secStats.windowSeries.length){
@@ -2153,14 +2399,18 @@ function renderAccountOpeningSection(website){
   if(futStats && futStats.windowSeries.length){
     const labels = futStats.windowSeries.map(s=>dateLabel(s.date));
     const data = futStats.windowSeries.map(s=>s.value);
-    const maxV = Math.max(...data);
+    const yfData = futStats.windowSeries.map(s=>yfByDate.has(s.date) ? yfByDate.get(s.date) : null);
+    const maxV = Math.max(...data, ...yfData.filter(v=>v!=null));
     charts.futuresAccounts = new Chart(document.getElementById('chartFuturesAccounts'), {
       type:'line',
-      data:{labels, datasets:[{label:'期貨市場新開戶數', data, borderColor:CHART_COLORS.blue, backgroundColor:CHART_COLORS.blueSoft, tension:.25, pointRadius:3, pointBackgroundColor:CHART_COLORS.blue, borderWidth:2, fill:true}]},
+      data:{labels, datasets:[
+        {label:'期貨市場新開戶數', data, borderColor:CHART_COLORS.blue, backgroundColor:CHART_COLORS.blueSoft, tension:.25, pointRadius:3, pointBackgroundColor:CHART_COLORS.blue, borderWidth:2, fill:true},
+        {label:'元大期貨新開戶數', data:yfData, borderColor:CHART_COLORS.gold, backgroundColor:'transparent', tension:.25, pointRadius:3, pointBackgroundColor:CHART_COLORS.gold, borderWidth:2, fill:false, spanGaps:true}
+      ]},
       options:{
         responsive:true, maintainAspectRatio:false,
         layout:{padding:{left:8, right:8}},
-        plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>'新開戶數：'+fmtInt(c.parsed.y)}}},
+        plugins:{legend:{position:'bottom', labels:{boxWidth:10,font:{size:10}}}, tooltip:{callbacks:{label:c=>`${c.dataset.label}：${c.parsed.y==null?'—':fmtInt(c.parsed.y)}`}}},
         scales:{...acctChartScales(), y:{...acctChartScales().y, suggestedMax:maxV*1.2}}
       },
       plugins:[acctPointValueLabelsPlugin]
@@ -2211,8 +2461,8 @@ function renderIBFuturesSection(ibFutures){
   charts.ibChannelSplit = new Chart(document.getElementById('chartIBChannelSplit'), {
     type:'bar',
     data:{labels, datasets:[
-      {label:'臨櫃開戶完成數', data:ibFutures.map(w=>w.counterComplete), backgroundColor:CHART_COLORS.purple, borderRadius:2},
-      {label:'線上開戶完成數', data:ibFutures.map(w=>w.onlineComplete), backgroundColor:CHART_COLORS.teal, borderRadius:2}
+      {label:'線上開戶完成數', data:ibFutures.map(w=>w.onlineComplete), backgroundColor:CHART_COLORS.teal, borderRadius:2},
+      {label:'臨櫃開戶完成數', data:ibFutures.map(w=>w.counterComplete), backgroundColor:CHART_COLORS.purple, borderRadius:2}
     ]},
     options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom', labels:{boxWidth:10,font:{size:11}}}},
       scales:{x:{...commonScales().x, stacked:true}, y:{stacked:true, beginAtZero:true, grid:{color:'#f0f1f3'}, title:{display:true,text:'開戶完成數',font:{size:10}}}}}
@@ -2221,8 +2471,8 @@ function renderIBFuturesSection(ibFutures){
   charts.ibEntitySplit = new Chart(document.getElementById('chartIBEntitySplit'), {
     type:'bar',
     data:{labels, datasets:[
-      {label:'外IB／券商IB', data:ibFutures.map(w=>w.waiComplete), backgroundColor:CHART_COLORS.blue, borderRadius:2},
-      {label:'元證', data:ibFutures.map(w=>w.yzComplete), backgroundColor:CHART_COLORS.green, borderRadius:2}
+      {label:'元證', data:ibFutures.map(w=>w.yzComplete), backgroundColor:CHART_COLORS.green, borderRadius:2},
+      {label:'外IB／券商IB', data:ibFutures.map(w=>w.waiComplete), backgroundColor:CHART_COLORS.blue, borderRadius:2}
     ]},
     options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom', labels:{boxWidth:10,font:{size:11}}}},
       scales:{x:{...commonScales().x, stacked:true}, y:{stacked:true, beginAtZero:true, grid:{color:'#f0f1f3'}, title:{display:true,text:'開戶完成數',font:{size:10}}}}}
@@ -2374,6 +2624,78 @@ function renderAppDetailCharts(apPlat, appPerf){
   }
 }
 
+// Tab② 新增：AP 明細分析圖表（比照 renderAppDetailCharts，資料來源改為「AP電子業績」分頁，
+// 只取分類為 AP 的平台，排除 API／元大Speedy／Multicharts／DMA）
+const AP_TREND_COLORS = {'iTRADER':CHART_COLORS.blue, '點金靈':CHART_COLORS.gold, 'YMF':CHART_COLORS.green, 'EasyWin':CHART_COLORS.purple, 'YesWin':CHART_COLORS.teal, '財富888':CHART_COLORS.red, '其它':CHART_COLORS.gray};
+function apOnlyEntries(r){ return Object.entries(r.platforms).filter(([name])=>classifyPlatformGroup('AP',name)==='AP'); }
+function renderApDetailCharts(apPlat, appPerf){
+  ['apRank','apMonthlyTrend','apAccVol','apShare'].forEach(k=>{ if(charts[k]) charts[k].destroy(); });
+  if(!apPlat.length) return;
+
+  const apSeries = apPlat.map(r=>{
+    const entries = apOnlyEntries(r);
+    return {date:r.date, acc: entries.reduce((s,[,p])=>s+(p.acc||0),0), vol: entries.reduce((s,[,p])=>s+(p.vol||0),0)};
+  });
+  let latest = null;
+  for(let i=apPlat.length-1;i>=0;i--){ if(apSeries[i].acc){ latest = apPlat[i]; break; } }
+  if(!latest) return;
+  const latestEntries = apOnlyEntries(latest);
+  const names = latestEntries.map(([n])=>n).sort((a,b)=>(latest.platforms[b].vol||0)-(latest.platforms[a].vol||0));
+  charts.apRank = new Chart(document.getElementById('chartApRank'), {
+    type:'bar',
+    data:{labels:names, datasets:[{label:'成交口數（'+dateLabel(latest.date)+'）', data:names.map(n=>latest.platforms[n].vol||0), backgroundColor:names.map(n=>AP_TREND_COLORS[n]||CHART_COLORS.gray)}]},
+    options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}, title:{display:true, text:'各 AP 平台當月成交口數排行', font:{size:13}}}, scales:{x:{grid:{display:false}}, y:{beginAtZero:true, grid:{color:'#f0f1f3'}}}}
+  });
+
+  // 逐月排行趨勢：同一張圖看各 AP 平台隨時間的消長，而不只是單一月份的排行
+  const trendLabels = apPlat.map(r=>dateLabel(r.date));
+  const allApNames = Array.from(new Set(apPlat.flatMap(r=>apOnlyEntries(r).map(([n])=>n))));
+  charts.apMonthlyTrend = new Chart(document.getElementById('chartApMonthlyTrend'), {
+    type:'line',
+    data:{labels:trendLabels, datasets:allApNames.map(name=>({
+      label:name, data:apPlat.map(r=>r.platforms[name]?r.platforms[name].vol:null),
+      borderColor:AP_TREND_COLORS[name]||CHART_COLORS.gray, backgroundColor:'transparent', tension:.2, pointRadius:0, borderWidth:2, spanGaps:true
+    }))},
+    options:{responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom', labels:{boxWidth:10,font:{size:10}}}, title:{display:true, text:'各 AP 平台逐月成交口數排行趨勢', font:{size:13}}},
+      scales:{x:narrowScales().x, y:narrowScales().y}}
+  });
+
+  const labels = apPlat.map(r=>dateLabel(r.date));
+  charts.apAccVol = new Chart(document.getElementById('chartApAccVol'), {
+    type:'line',
+    data:{labels, datasets:[
+      {label:'AP 合計實動戶數（各平台加總，非去重）', data:apSeries.map(s=>s.acc), borderColor:CHART_COLORS.blue, backgroundColor:'transparent', tension:.2, pointRadius:0, borderWidth:2, yAxisID:'y', spanGaps:true},
+      {label:'AP 合計成交口數', data:apSeries.map(s=>s.vol), borderColor:CHART_COLORS.gold, backgroundColor:'transparent', tension:.2, pointRadius:0, borderWidth:2, yAxisID:'y1', spanGaps:true}
+    ]},
+    options:{responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom', labels:{boxWidth:10,font:{size:10}}}},
+      scales:{x:narrowScales().x,
+        y:{position:'left', title:{display:true,text:'戶數',font:{size:10}}, grid:{color:'#f0f1f3'}},
+        y1:{position:'right', title:{display:true,text:'成交口數',font:{size:10}}, grid:{display:false}}
+      }}
+  });
+
+  // AP 佔 AP＋APP 業績比例：與 renderKPIsAp 裡的 KPI 卡片同口徑（不含 API／DMA）
+  if(appPerf.length){
+    const shareDates = allPlatformDates(apPlat, appPerf);
+    const shareSeries = shareDates.map(date=>{
+      const list = combinedPlatformsForDate(apPlat, appPerf, date);
+      const apVol = list.filter(p=>p.group==='AP').reduce((s,p)=>s+p.vol,0);
+      const appVol = list.filter(p=>p.group==='APP').reduce((s,p)=>s+p.vol,0);
+      return {date, ratio:(apVol+appVol)?apVol/(apVol+appVol)*100:null};
+    });
+    charts.apShare = new Chart(document.getElementById('chartApShare'), {
+      type:'line',
+      data:{labels:shareSeries.map(s=>dateLabel(s.date)), datasets:[
+        {label:'AP 佔 AP＋APP 業績比例', data:shareSeries.map(s=>s.ratio), borderColor:CHART_COLORS.blue, backgroundColor:CHART_COLORS.blueSoft, tension:.2, pointRadius:0, borderWidth:2, fill:true, spanGaps:true}
+      ]},
+      options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>'AP占比：'+(c.parsed.y==null?'—':c.parsed.y.toFixed(1)+'%')}}},
+        scales:{x:commonScales().x, y:{min:0, max:100, grid:{color:'#f0f1f3'}, ticks:{callback:v=>v+'%'}}}}
+    });
+  }
+}
+
 // Tab⑤ 新增：Facebook 貼文柱狀圖／貼文數vs追蹤人數雙軸／YouTube直播場數與觀看次數
 function renderFbYtCharts(social){
   ['fbDual','ytLive'].forEach(k=>{ if(charts[k]) charts[k].destroy(); });
@@ -2441,6 +2763,7 @@ function renderDomainTable(domains){
     <td>${d.name||'—'}</td><td>${d.category||'—'}</td><td>${fmtDate(d.start)}</td><td>${fmtDate(d.end)}</td>
     <td>${d.status||'—'}</td><td>${domainStatusBadge(d,today)}</td><td>${d.useUnit||'—'}</td><td>${d.contact||'—'}</td>
   </tr>`).join('') || '<tr><td colspan="8">無資料</td></tr>';
+  enableTableSort('domainTable');
 }
 
 function renderAwards(awards){
@@ -2563,7 +2886,8 @@ function tableToCSV(table){
   return rows.map(tr=>{
     const cells = Array.from(tr.querySelectorAll('th,td'));
     return cells.map(td=>{
-      let text = td.textContent.replace(/\s+/g,' ').trim();
+      // 表頭若有點擊排序用的箭頭圖示（▲／▼／↕），匯出 CSV 時要排除，避免混入欄位名稱
+      let text = td.textContent.replace(/[▲▼↕]/g,'').replace(/\s+/g,' ').trim();
       if(/[",\n]/.test(text)) text = '"'+text.replace(/"/g,'""')+'"';
       return text;
     }).join(',');
@@ -2578,6 +2902,71 @@ function downloadTableCSV(table, filename){
   link.click();
   setTimeout(()=>URL.revokeObjectURL(url), 1000);
 }
+/* ===================== 通用表格排序（點擊表頭箭頭，依該欄位由高到低／低到高排序） ===================== */
+// 原理：表格重繪時只是把 thead／tbody 的 innerHTML 整個換掉，<table> 元素本身不會被換掉，
+// 所以排序點擊事件綁在 <table> 上（事件代理），只要綁過一次（用 table.dataset.sortBound 避免重複綁定），
+// 之後表格內容不管重繪幾次，點擊排序都還是有效；每次重繪後則呼叫 enableTableSort(tableId)
+// 幫新插入的 <th> 補上排序箭頭圖示（箭頭會隨 thead.innerHTML 被整個換掉而消失，需要重新插入）。
+// 取得儲存格可排序用的值：優先判斷是否為日期格式（YYYY/MM 或 YYYY/MM/DD，直接去除斜線轉成數字比大小），
+// 其次去除千分位逗號、百分號、pp（百分點）、σ（標準差）等單位與正號後嘗試轉成數字；
+// 無法轉成數字（例如平台名稱、分類、備註等文字欄位）則退回文字排序；空值／"—"／"-" 一律視為最小，排序後固定墊底。
+function cellSortValue(td){
+  if(!td) return null;
+  const text = td.textContent.replace(/[▲▼↕]/g,'').trim();
+  if(text===''||text==='—'||text==='-'||text==='－') return null;
+  if(/^\d{4}(\/\d{1,2}){1,2}$/.test(text)) return parseInt(text.replace(/\//g,''),10);
+  const cleaned = text.replace(/,/g,'').replace(/[%σ]/g,'').replace(/pp$/,'').replace(/^\+/,'').trim();
+  return /^-?\d+(\.\d+)?$/.test(cleaned) ? parseFloat(cleaned) : text;
+}
+function enableTableSort(tableId){
+  const table = document.getElementById(tableId);
+  if(!table) return;
+  const thead = table.querySelector('thead');
+  if(!thead) return;
+  Array.from(thead.querySelectorAll('th')).forEach(th=>{
+    th.classList.add('sortable-th');
+    if(!th.querySelector('.sort-arrow')){
+      const arrow = document.createElement('span');
+      arrow.className = 'sort-arrow';
+      arrow.textContent = '↕';
+      th.appendChild(arrow);
+    }
+  });
+  if(table.dataset.sortBound) return;
+  table.dataset.sortBound = '1';
+  let sortState = {col:-1, dir:1};
+  table.addEventListener('click', e=>{
+    const th = e.target.closest('th');
+    if(!th || !thead.contains(th)) return;
+    const ths = Array.from(th.parentNode.children);
+    const colIndex = ths.indexOf(th);
+    if(colIndex===-1) return;
+    sortState = (sortState.col===colIndex) ? {col:colIndex, dir:sortState.dir*-1} : {col:colIndex, dir:1};
+    ths.forEach((t,i)=>{
+      const arrow = t.querySelector('.sort-arrow');
+      if(!arrow) return;
+      arrow.textContent = i===colIndex ? (sortState.dir===1?'▲':'▼') : '↕';
+      t.classList.toggle('sort-active', i===colIndex);
+    });
+    const tbody = table.querySelector('tbody');
+    if(!tbody) return;
+    const rows = Array.from(tbody.children);
+    // 「無資料」等橫跨整列的佔位列不參與排序，排序完固定留在最後
+    const dataRows = rows.filter(r=>!r.querySelector('td[colspan]'));
+    const placeholderRows = rows.filter(r=>r.querySelector('td[colspan]'));
+    dataRows.sort((ra,rb)=>{
+      const va = cellSortValue(ra.children[colIndex]), vb = cellSortValue(rb.children[colIndex]);
+      if(va==null && vb==null) return 0;
+      if(va==null) return 1;
+      if(vb==null) return -1;
+      if(typeof va==='number' && typeof vb==='number') return (va-vb)*sortState.dir;
+      return String(va).localeCompare(String(vb),'zh-Hant')*sortState.dir;
+    });
+    dataRows.forEach(r=>tbody.appendChild(r));
+    placeholderRows.forEach(r=>tbody.appendChild(r));
+  });
+}
+
 // 幫每個圖表（.chart-wrap 內的 canvas）加上「複製圖片／下載PNG」按鈕，
 // 每個表格（.tblwrap 內的 table）加上「下載表格」按鈕。可重複呼叫，已加過的元素會自動跳過。
 function setupExportToolbars(){
